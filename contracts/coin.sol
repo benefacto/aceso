@@ -4,8 +4,9 @@ interface tokenRecipient {
     function receiveApproval(address _from, uint256 _value, address _token, bytes calldata _extraData) external;
 }
 
-contract TokenERC20 {
+contract Coin {
     // Public variables of the token
+    address public collectivePot;
     string public name;
     string public symbol;
     uint8 public decimals = 18;
@@ -32,13 +33,24 @@ contract TokenERC20 {
      */
     constructor(
         uint256 initialSupply,
+        address collectivePotAddress,
         string memory tokenName,
         string memory tokenSymbol
     ) public {
         totalSupply = initialSupply * 10 ** uint256(decimals);  // Update total supply with the decimal amount
         balanceOf[msg.sender] = totalSupply;                // Give the creator all initial tokens
+        collectivePot = collectivePotAddress                // Set the address of the collectivePot from parameter for now
         name = tokenName;                                   // Set the name for display purposes
         symbol = tokenSymbol;                               // Set the symbol for display purposes
+    }
+
+    /**
+     * Internal calculation of amount to be transferred to collectivePot
+     */
+    function _calculateCollectivePotFee(uint _value)
+    {
+      // TO-DO: Implement a reliable percentage calculation of amount, handling overflows
+      return -1;
     }
 
     /**
@@ -51,6 +63,8 @@ contract TokenERC20 {
         require(balanceOf[_from] >= _value);
         // Check for overflows
         require(balanceOf[_to] + _value >= balanceOf[_to]);
+        // TO-DO: Implement transfer fee to collectivePot
+        uint transferFee = _calculateCollectivePotFee(_value);
         // Save this for an assertion in the future
         uint previousBalances = balanceOf[_from] + balanceOf[_to];
         // Subtract from the sender
