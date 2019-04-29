@@ -1,9 +1,5 @@
 pragma solidity >=0.4.22 <0.6.0;
 
-interface tokenRecipient {
-    function receiveApproval(address _from, uint256 _value, address _token, bytes calldata _extraData) external;
-}
-
 contract Coin {
     // Public variables of the token
     address public collectivePot;
@@ -34,24 +30,24 @@ contract Coin {
         string memory tokenSymbol
     ) public {
         totalSupply = initialSupply * 10 ** uint256(decimals);  // Update total supply with the decimal amount
-        balanceOf[msg.sender] = totalSupply;                // Give the creator all initial tokens
-        feeDenominator = calculateFeeDenominator;
-        collectivePot = collectivePotAddress                // Set the address of the collectivePot from parameter for now
-        name = tokenName;                                   // Set the name for display purposes
-        symbol = tokenSymbol;                               // Set the symbol for display purposes
+        balanceOf[msg.sender] = totalSupply;                    // Give the creator all initial tokens
+        feeDenominator = calculateFeeDenominator;               // Set the denominator used to caluclate the transfer fee that goes to the collective pot
+        collectivePot = collectivePotAddress;                   // Set the address of the collectivePot from parameter for now
+        name = tokenName;                                       // Set the name for display purposes
+        symbol = tokenSymbol;                                   // Set the symbol for display purposes
     }
 
     /**
      * Internal calculation of amount to be transferred to collectivePot
      */
-    function _calculateCollectivePotFee(uint _value)
+    function _calculateCollectivePotFee(uint _value) internal view returns(uint)
     {
         // check for overflows
-        require(_numerator * 10 > _numerator);
+        require(_value * 10 > _value);
         uint _numerator  = _value * 10;
         // with rounding of last digit
-        uint _quotient =  ((_numerator / calculateFeeDenominator) + 5) / 10;
-        return ( _quotient);
+        uint _quotient =  ((_numerator / feeDenominator) + 5) / 10;
+        return _quotient;
     }
 
     /**
